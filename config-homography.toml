@@ -1,0 +1,45 @@
+# Alternative calibration using a four-point homography instead of two lines.
+# Run with: cargo run --release -- samples/traffic.webm --config config-homography.toml
+#
+# The four pixel points must be a quadrilateral lying on the road surface, given
+# clockwise starting from the bottom-left. The four world points are the same
+# corners in metres on that road plane.
+
+[detector]
+model = "models/yolov8n.onnx"
+confidence = 0.35
+iou_threshold = 0.45
+intra_threads = 0
+provider = "cpu"
+skip = 2
+
+[tracker]
+iou_threshold = 0.3
+min_hits = 3
+max_age = 10
+
+[calibration]
+method = "homography"
+speed_limit_kmh = 50.0
+
+# Pixel corners of the road patch, clockwise from bottom-left.
+pixels = [
+    [300.0, 1000.0],
+    [1100.0, 1000.0],
+    [900.0, 700.0],
+    [500.0, 700.0],
+]
+
+# The same corners in metres. 10 m across and 30 m of road depth.
+world_m = [
+    [0.0, 0.0],
+    [10.0, 0.0],
+    [10.0, 30.0],
+    [0.0, 30.0],
+]
+
+# How quickly the reported speed follows new samples, 0..1.
+smoothing = 0.4
+# Draw the calibration lines or polygon over the video.
+# Set to false once the geometry is tuned, for a clean picture.
+show_geometry = true

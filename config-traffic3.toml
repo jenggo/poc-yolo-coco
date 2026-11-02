@@ -1,0 +1,48 @@
+# Calibration for samples/traffic3.webm: a motorway seen from a bridge, so traffic
+# moves vertically in the frame and the perspective is strong.
+#
+# The line method can still detect crossings here, because the bottom edge of a
+# vehicle moves up or down the frame. What it cannot do is get the *scale* right:
+# one pixel near the horizon covers many metres, one pixel near the camera covers
+# a few centimetres. A single distance_m cannot describe both, so the line method
+# reports wrong speeds on this view. The homography corrects for perspective.
+
+[detector]
+model = "models/yolov8n.onnx"
+confidence = 0.35
+iou_threshold = 0.45
+intra_threads = 0
+provider = "cpu"
+skip = 2
+
+[tracker]
+iou_threshold = 0.3
+min_hits = 3
+max_age = 10
+
+[calibration]
+# This view is a receding road, so the line method would need horizontal lines.
+# Homography is used instead for correct perspective.
+method = "homography"
+speed_limit_kmh = 110.0
+
+# Road patch corners in pixels, clockwise from the bottom-left of the near lane.
+pixels = [
+    [120.0, 700.0],
+    [560.0, 700.0],
+    [560.0, 380.0],
+    [330.0, 380.0],
+]
+
+# The same corners in metres. Roughly a 3.5 m lane and 25 m of road depth.
+world_m = [
+    [0.0, 0.0],
+    [3.5, 0.0],
+    [3.5, 25.0],
+    [0.0, 25.0],
+]
+
+smoothing = 0.4
+# Draw the calibration lines or polygon over the video.
+# Set to false once the geometry is tuned, for a clean picture.
+show_geometry = true

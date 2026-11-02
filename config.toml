@@ -1,0 +1,58 @@
+# cctvpro runtime configuration.
+# Every key below is optional: an omitted key falls back to the documented default.
+
+[detector]
+# YOLOv8n ONNX weights (fetch with scripts/fetch-model.sh).
+model = "models/yolov8n.onnx"
+# Minimum class score to keep a detection.
+confidence = 0.35
+# IoU above which two same-class boxes collapse into one.
+iou_threshold = 0.45
+# ONNX Runtime intra-op threads. 0 lets the runtime pick.
+intra_threads = 0
+# "cpu" (default) or "cuda". CUDA needs `cargo build --release --features cuda`.
+provider = "cpu"
+# Run inference on every Nth frame; the tracker predicts the frames in between.
+skip = 2
+
+[tracker]
+# Minimum IoU between a detection and a predicted track box to match them.
+iou_threshold = 0.3
+# Matches required before a track is drawn.
+min_hits = 3
+# Consecutive missed frames before a track is dropped.
+max_age = 10
+
+[calibration]
+# "line" uses two horizontal lines and a real-world distance.
+# "homography" uses four pixel/world point pairs.
+method = "line"
+# Camera viewpoint. It sets both the default line positions and the axis the
+# lines measure:
+#   horizontal = the road crosses the frame left to right, so the lines run
+#                vertically and left-right motion is measured (x)
+#   vertical   = the road recedes toward a horizon, so the lines run horizontally
+#                and up-down motion is measured (y)
+# Override from the command line with --orientation horizontal|vertical.
+orientation = "horizontal"
+# Speeds above this are drawn in red.
+speed_limit_kmh = 50.0
+# Line positions along the measured axis. A value in 0.0..=1.0 is a fraction of
+# the frame extent, so the same config keeps working when the same camera is
+# recorded at another resolution. A value above 1.0 is an absolute pixel.
+# A vehicle crossing both lines gets a speed.
+line1 = 0.59
+line2 = 0.83
+# Real-world distance between line1 and line2, in meters.
+# This is a placeholder for the bundled clip: measure the real gap between the two
+# painted rows on the road and put that number here, or every speed is scaled by
+# the same wrong factor.
+distance_m = 20.0
+# Homography method only: four pixel points, then the matching road points in meters.
+pixels = []
+world_m = []
+# Homography smoothing, 0..1. Higher reacts faster, lower is steadier.
+smoothing = 0.4
+# Draw the calibration lines or polygon over the video.
+# Set to false once the geometry is tuned, for a clean picture.
+show_geometry = true
